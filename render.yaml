@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: emlak-platform
+    runtime: docker
+    plan: free
+    envVars:
+      - key: APP_NAME
+        value: "منصة املاك"
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        value: "base64:jES4M9H2+qY+d5O0+ZbQPU8/RMbc+p0Y4yBBl8HRKFg="
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_LOCALE
+        value: ar
+      - key: APP_FALLBACK_LOCALE
+        value: ar
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: LOG_CHANNEL
+        value: stack
+      - key: LOG_LEVEL
+        value: error
+      - key: BCRYPT_ROUNDS
+        value: "12"
