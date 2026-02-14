@@ -1,0 +1,218 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\RevenueResource\Pages;
+use App\Filament\Resources\RevenueResource\RelationManagers;
+use App\Models\Revenue;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+
+class RevenueResource extends Resource
+{
+    protected static ?string $model = Revenue::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-banknotes';
+
+    protected static ?string $navigationLabel = 'الإيرادات';
+
+    protected static ?string $modelLabel = 'إيراد';
+
+    protected static ?string $pluralModelLabel = 'الإيرادات';
+
+    protected static ?string $navigationGroup = 'العقارات';
+
+    protected static ?int $navigationSort = 5;
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\TextInput::make('code')
+                    ->label('رقم الإيراد')
+                    ->disabled()
+                    ->dehydrated(false)
+                    ->placeholder('سيتم إنشاؤه تلقائياً'),
+                Forms\Components\Select::make('type')
+                    ->label('نوع الإيراد')
+                    ->required()
+                    ->options([
+                        'إيجار' => 'إيجار',
+                        'تأمين' => 'تأمين',
+                        'خدمات' => 'خدمات',
+                        'غرامات تأخير' => 'غرامات تأخير',
+                        'صيانة' => 'صيانة',
+                        'أخرى' => 'أخرى',
+                    ]),
+                Forms\Components\TextInput::make('amount')
+                    ->label('المبلغ')
+                    ->required()
+                    ->numeric()
+                    ->minValue(0)
+                    ->prefix('ر.س')
+                    ->suffix('ريال'),
+                Forms\Components\DatePicker::make('date')
+                    ->label('التاريخ')
+                    ->required()
+                    ->native(false)
+                    ->displayFormat('Y-m-d')
+                    ->default(now()),
+                Forms\Components\Textarea::make('description')
+                    ->label('الوصف')
+                    ->rows(3)
+                    ->columnSpanFull(),
+                Forms\Components\Select::make('property_id')
+                    ->label('العقار')
+                    ->relationship('property', 'name')
+                    ->searchable()
+                    ->preload(),
+                Forms\Components\Select::make('contract_id')
+                    ->label('العقد')
+                    ->relationship('contract', 'code')
+                    ->searchable()
+                    ->preload(),
+                Forms\Components\Select::make('status')
+                    ->label('الحالة')
+                    ->required()
+                    ->options([
+                        'مدفوعة' => 'مدفوعة',
+                        'معلقة' => 'معلقة',
+                        'متأخرة' => 'متأخرة',
+                        'ملغاة' => 'ملغاة',
+                    ])
+                    ->default('مدفوعة'),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('code')
+                    ->label('رقم الإيراد')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('type')
+                    ->label('النوع')
+                    ->searchable()
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'إيجار' => 'success',
+                        'تأمين' => 'info',
+                        'خدمات' => 'warning',
+                        'غرامات تأخير' => 'danger',
+                        'صيانة' => 'gray',
+                        'أخرى' => 'gray',
+                        default => 'gray',
+                    }),
+                Tables\Columns\TextColumn::make('amount')
+                    ->label('المبلغ')
+                    ->numeric()
+                    ->sortable()
+                    ->money('SAR'),
+                Tables\Columns\TextColumn::make('date')
+                    ->label('التاريخ')
+                    ->date('Y-m-d')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('property.name')
+                    ->label('العقار')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('contract.code')
+                    ->label('العقد')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('الحالة')
+                    ->searchable()
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'مدفوعة' => 'success',
+                        'معلقة' => 'warning',
+                        'متأخرة' => 'danger',
+                        'ملغاة' => 'danger',
+                        default => 'gray',
+                    }),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('تاريخ الإنشاء')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('type')
+                    ->label('نوع الإيراد')
+                    ->options([
+                        'إيجار' => 'إيجار',
+                        'تأمين' => 'تأمين',
+                        'خدمات' => 'خدمات',
+                        'غرامات تأخير' => 'غرامات تأخير',
+                        'صيانة' => 'صيانة',
+                        'أخرى' => 'أخرى',
+                    ]),
+                Tables\Filters\SelectFilter::make('status')
+                    ->label('الحالة')
+                    ->options([
+                        'مدفوعة' => 'مدفوعة',
+                        'معلقة' => 'معلقة',
+                        'متأخرة' => 'متأخرة',
+                        'ملغاة' => 'ملغاة',
+                    ]),
+                Tables\Filters\SelectFilter::make('property_id')
+                    ->label('العقار')
+                    ->relationship('property', 'name')
+                    ->searchable()
+                    ->preload(),
+                Tables\Filters\Filter::make('date')
+                    ->form([
+                        Forms\Components\DatePicker::make('from')
+                            ->label('من تاريخ'),
+                        Forms\Components\DatePicker::make('until')
+                            ->label('إلى تاريخ'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('date', '>=', $date),
+                            )
+                            ->when(
+                                $data['until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('date', '<=', $date),
+                            );
+                    }),
+            ])
+            ->actions([
+                Tables\Actions\ViewAction::make()->label('عرض'),
+                Tables\Actions\EditAction::make()->label('تعديل'),
+                Tables\Actions\DeleteAction::make()->label('حذف'),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make()->label('حذف المحدد'),
+                ]),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListRevenues::route('/'),
+            'create' => Pages\CreateRevenue::route('/create'),
+            'view' => Pages\ViewRevenue::route('/{record}'),
+            'edit' => Pages\EditRevenue::route('/{record}/edit'),
+        ];
+    }
+}
