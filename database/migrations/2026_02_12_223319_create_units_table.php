@@ -21,6 +21,8 @@ return new class extends Migration
             $table->decimal('area', 10, 2)->nullable()->comment('المساحة بالمتر المربع');
             $table->integer('bedrooms')->nullable();
             $table->integer('bathrooms')->nullable();
+            $table->integer('living_rooms')->nullable();
+            $table->integer('kitchens')->nullable();
             $table->string('status')->default('متاحة');
             $table->decimal('rent_price', 10, 2)->nullable();
             $table->timestamps();

@@ -21,6 +21,8 @@ class Unit extends Model
         'area',
         'bedrooms',
         'bathrooms',
+        'living_rooms',
+        'kitchens',
         'status',
         'rent_price',
     ];
@@ -39,7 +41,7 @@ class Unit extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['code', 'property_id', 'type', 'floor', 'number', 'area', 'bedrooms', 'bathrooms', 'status', 'rent_price'])
+            ->logOnly(['code', 'property_id', 'type', 'floor', 'number', 'area', 'bedrooms', 'bathrooms', 'living_rooms', 'kitchens', 'status', 'rent_price'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
     }

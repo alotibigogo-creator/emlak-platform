@@ -77,6 +77,14 @@ class UnitResource extends Resource
                     ->label('عدد الحمامات')
                     ->numeric()
                     ->minValue(0),
+                Forms\Components\TextInput::make('living_rooms')
+                    ->label('عدد الصالات')
+                    ->numeric()
+                    ->minValue(0),
+                Forms\Components\TextInput::make('kitchens')
+                    ->label('عدد المطابخ')
+                    ->numeric()
+                    ->minValue(0),
                 Forms\Components\Select::make('status')
                     ->label('الحالة')
                     ->required()
@@ -130,6 +138,14 @@ class UnitResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('bathrooms')
                     ->label('الحمامات')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('living_rooms')
+                    ->label('الصالات')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('kitchens')
+                    ->label('المطابخ')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
