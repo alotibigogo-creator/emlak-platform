@@ -98,9 +98,9 @@ class CustomerResource extends Resource
                     ->label('الجنسية')
                     ->searchable()
                     ->badge(),
-                Tables\Columns\TextColumn::make('contracts_count')
-                    ->label('عدد العقود')
-                    ->counts('contracts')
+                Tables\Columns\TextColumn::make('properties_count')
+                    ->label('عدد العقارات')
+                    ->state(fn ($record) => $record->contracts()->join('units', 'contracts.unit_id', '=', 'units.id')->distinct()->count('units.property_id'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاريخ الإنشاء')
